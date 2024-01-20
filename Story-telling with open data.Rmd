@@ -1,0 +1,455 @@
+---
+title: "**Deaths in Australia 2011-2021**"
+output: 
+  flexdashboard::flex_dashboard:
+    storyboard: true
+    orientation: columns
+    vertical_layout: fill
+    theme: 
+      version: 4
+      bg: "white"
+      fg: "black" 
+      primary: "purple"
+      navbar-bg: "black"
+      base_font: 
+        google: Roboto
+      heading_font:
+        google: PT Sans
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(ggplot2)
+library(gridExtra)
+library(tidyverse)
+library(plotly)
+library(ozmaps)   
+library(sf)
+library(dplyr)
+library(sp)
+library(leaflet)
+library(raster)
+library(dygraphs)
+library(magick)
+
+```
+
+```{r include=FALSE}
+getwd()
+setwd("C:/Users/Rakshit Chandna/OneDrive/Desktop/DataMain/Data Visualisation and comm/Assignment 3 Final")
+```
+
+
+### **Introduction** {data-commentary-width=2000}
+  
+
+<font style="font-size: 18px">**Deaths in Australia, like in any country, are an significant aspect of understanding population health and well-being. A study of mortality rates and causes of death can provide important insights into the state of health in the community, as well as identify new epidemiological trends that may have a bearing on public health policies and interventions. Australia has been making important advances in healthcare over the years, resulting in improved life expectancy and reduced mortality rates.**</font>
+
+<font style="font-size: 18px">**In this context, the patterns and factors influencing mortality rates can be revealed through examining data and trends related to deaths in Australia between 2011 and 2021. The analysis of these statistics can help identify the most common causes of death, specific mortality rates and potential differences between various population groups.**</font>
+
+<font style="font-size: 18px">**In this assignment, we will focus on examining and analyzing various aspects related to deaths in Australia from 2011 to 2021. Our objective is to gain a comprehensive understanding of mortality trends, leading causes of death, and demographic factors influencing mortality rates within the Australian population. To achieve this, we aim to access relevant data and statistics from reliable sources such as:** 
+
+- **Australian Bureau of Statistics (ABS)**  
+- **Australian Institute of Health and Welfare (AIHW)**
+
+**By utilizing those reliable sources, we can obtain useful information on mortality rates, causes of deaths, age specific patterns and other important insights.**</font>
+
+
+  
+
+  
+
+
+### **Deaths by Gender 2011-2021**
+
+```{r include=FALSE}
+# Total Deaths (Male and Female) 2011-2021
+
+Total_deaths <- readxl::read_excel("Total deaths 2011-2021.xlsx")
+Total_deaths
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+col <- c("deeppink" , "darkblue")
+fig <- plot_ly(Total_deaths, x = ~Years, y = ~Deaths, text = ~Group, type = 'scatter', mode = 'markers', size = ~Deaths, color = ~Group, colors = col,
+        marker = list(opacity = 0.65, sizemode = 'diameter'))|> 
+  layout(title = "Deaths by Gender 2011-2021",xaxis = list(title = "Years"), yaxis = list(title = "Number of Deaths") , plot_bgcolor = "cornsilk")
+fig
+```
+ 
+  
+***
+**Deaths by Gender** 
+
+From the comprehensive overview of "Deaths by Gender", we can observe that both the categories have shown quite similar trend from the year 2011-2021. The highest number of deaths were recorded during the Covid period (2019-2021) for both the genders. 
+
+
+
+
+
+
+<font style="font-size: 9px">*Note: Hover the cursor on each bubble for details</plot>
+
+ 
+
+### **Causes of Deaths** {data-commentary-width=0}
+
+```{r include=FALSE}
+
+COD <- readxl::read_excel("Deaths from Diseases.xlsx")
+head(COD)
+```
+
+
+
+```{r echo=FALSE}
+fig <- plot_ly( data = COD,
+  x = ~`Years`, 
+  y = ~`Infectious and parasitic diseases`,
+  name = "Infectious and parasitic diseases",
+  type = "scatter",
+  mode = "lines", line = list(color = "green2"))|> 
+  layout(title = "Causes of Deaths in Australia 2011-2021",xaxis = list(title = "Years"), yaxis = list(title = "Deaths") , plot_bgcolor = "aliceblue",
+        updatemenus = list(
+    list(
+      type = "buttons",
+      y = 0.8,
+      buttons = list(
+list(method = "update",
+             args = list(list(visible = c(FALSE,TRUE, FALSE,FALSE,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE))),
+             label = "Major Causes"),
+
+        list(method = "update",
+             args = list(list(visible = c(TRUE,FALSE, TRUE,TRUE,FALSE,TRUE,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE))),
+             label = "Minor Causes")))
+  )) %>%
+add_trace(y = ~`Neoplasms`, name = "Neoplasms", line = list(color = "darkgoldenrod"))%>% 
+add_trace(y = ~`Endocrine, nutritional and metabolic diseases`, name = "Endocrine, nutritional and metabolic diseases", line = list(color = "chocolate"))%>% 
+add_trace(y = ~`Mental and behavioural disorders`, name = "Mental and behavioural disorders", line = list(color = "green"))%>%
+   add_trace(y = ~`Circulatory system diseases`, name = "Circulatory system diseases", line = list(color = "cyan"))%>%
+add_trace(y = ~`Nervous system diseases`, name = "Nervous system diseases", line = list(color = "darkorchid2"))%>% 
+add_trace(y = ~`Respiratory system diseases`, name = "Respiratory system diseases", line = list(color = "darkslategray"))%>% 
+add_trace(y = ~`Digestive system diseases`, name = "Digestive system diseases", line = list(color = "orange"))%>% 
+add_trace(y = ~`Skin and subcutaneous tissue diseases`, name = "Skin and subcutaneous tissue diseases", line = list(color = "deeppink"))%>% 
+add_trace(y = ~`Musculoskeletal system diseases`, name = "Musculoskeletal system diseases", line = list(color = "black"))%>% 
+add_trace(y = ~`Genitourinary system diseases`, name = "Genitourinary system diseases", line = list(color = "brown"))%>% 
+add_trace(y = ~`Pregnancy, childbirth and the puerperium`, name = "Pregnancy, childbirth and the puerperium", line = list(color = "blue"))%>% 
+add_trace(y = ~`Congenital malformations and chromosomal abnormalities`, name = "Congenital malformations and chromosomal abnormalities", line = list(color = "purple"))%>% 
+add_trace(y = ~`Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified`, name = "Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified", line = list(color = "coral"))%>% 
+add_trace(y = ~`External causes of morbidity and mortality`, name = "External causes of morbidity and mortality", line = list(color = "darkred"))
+
+fig
+```
+
+
+### **Deaths each States 2011-2021** {data-commentary-width=355}
+
+
+
+```{r include=FALSE}
+aus1 <- getData("GADM", country = "AUS", level = 1)
+
+
+aus1@data[["NAME_1"]]
+```
+
+```{r include=FALSE}
+# Deaths each state 2011-2021
+Death_state <- readxl::read_excel("Deaths by States.xlsx")
+
+Death_state
+```
+
+
+```{r include=FALSE}
+df2 <- data.frame(State = aus1@data[["NAME_1"]],
+                 num = sampleInt(1000,11))
+df2 <- left_join(df2,Death_state, by = "State")
+df2
+```
+
+
+```{r include=FALSE}
+
+df2 <- replace(df2, is.na(df2), 0) 
+
+df2
+```
+
+
+
+
+```{r echo=FALSE, warning=FALSE}
+col_pal <- colorNumeric(palette = "magma",
+                        domain = df2$Deaths, reverse = TRUE)
+
+details_text <- paste(
+  "State: " , aus1$NAME_1 ,"<br/>",
+  "Deaths: ", df2$Deaths, 
+  sep ="")%>%
+  lapply(htmltools::HTML)
+map <- leaflet()%>%
+  addPolygons(data = aus1,
+              stroke = FALSE,
+              fillColor = ~col_pal(df2$Deaths),
+              label = details_text,
+              fillOpacity = 0.9,
+              color = "black",
+              weight = 0.9,
+              labelOptions = labelOptions( 
+      style = list("font-weight" = "normal", padding = "3px 8px"), 
+      textsize = "13px", 
+      direction = "auto"
+    ))%>%
+  addLegend(position = "bottomleft", pal = col_pal,
+            values = df2$Deaths, title = "Number of Deaths") %>% 
+  setView( lng = 133.45, lat = -25.25, zoom = 4 )
+
+
+
+title_text <- "Deaths in each state of Australia 2011-2021"
+
+map <- addControl(map = map,
+                  position = "topright",
+                  title_text,
+                  className = "map-title")
+map
+```
+
+
+
+
+
+***
+
+**Deaths in each States**
+
+The map presents a comprehensive overview of *"Deaths in each States of Australia"* based on the latest available data generated by ABS. By visualizing the data through an interactive map, we can observe that the highest total number of deaths recoreded in **New South Whales** followed by **Victoria** and **Queensland** and the lowest total number of deaths in the **Northern Territory** from the year 2011-2021.
+
+
+
+
+
+
+
+
+
+
+
+
+<font style="font-size: 9px">*Note: Hover the cursor on each states of map for details</plot>
+
+
+
+
+
+
+
+
+
+### **Self-harm Intentional Deaths (Suicides)** {data-commentary-width=300}
+
+```{r include=FALSE}
+SH <- readxl::read_excel("Self-harm deaths.xlsx")
+SH
+```
+
+```{r echo=FALSE}
+fig <- plot_ly(SH, x = ~Years , y = ~NSW, type = 'bar', name = 'NSW',
+        marker = list(color = 'orange'))
+fig <- fig %>% add_trace(y = ~VIC, name = 'VIC', marker = list(color = "purple"))
+fig <- fig %>% add_trace(y = ~QLD, name = 'QLD', marker = list(color = "green"))
+fig <- fig %>% add_trace(y = ~SA, name = 'SA', marker = list(color = "brown"))
+fig <- fig %>% add_trace(y = ~WA, name = 'WA', marker = list(color = "skyblue"))
+fig <- fig %>% add_trace(y = ~TAS, name = 'TAS', marker = list(color = "red"))
+fig <- fig %>% add_trace(y = ~NT, name = 'NT', marker = list(color = "darkblue"))
+fig <- fig %>% add_trace(y = ~ACT, name = 'ACT', marker = list(color = "darkgoldenrod"))|> 
+  layout(title = list(text = "Self-harm Intentional Deaths (Suicides)",
+                      font = list(color = "black",
+                                  family = "Sitka Small")),
+         plot_bgcolor = "white",
+         paper_bgcolor = "white",
+         xaxis = list(color = "black",
+                      title = "Years",
+                      gridcolor = "lightgray"),
+         yaxis = list(color = "black",
+                      title = "Number of Deaths (Suicides)",
+                      gridcolor = "lightgray"),
+         legend = list(
+           title = list(
+             text = "<b>States</b>",
+             font = list(color = "black")
+           )
+         ))
+
+fig
+```
+
+*** 
+
+**Self-harm Intentional Deaths by States**
+
+From the year 2011-2021, every year an enormous amount of people have committed suicide maybe due to mental health or experiencing thoughts of self-harm. From the graph it is significant that every year there is the same average (flat overall mean level) amount of people committing suicides in every states of Australia. 
+
+The three states which have recorded historically high number of suicides are:
+
+- **New South Whales**
+- **Victoria**
+- **Queensland**
+
+
+
+
+
+
+
+
+
+
+<font style="font-size: 9px">*Note: The following graph is interactive, select/deselect states boxes for more details</plot>
+
+
+### **Drug or Alcohol Induced Deaths** {data-commentary-width=300}
+
+```{r include=FALSE}
+DA <- readxl::read_excel("Agewise death by Drug or Alchohol.xlsx")
+DA
+```
+
+
+
+
+```{r echo=FALSE}
+cols <- c("yellow" , "darkgreen","darkblue","brown","darkgrey")
+ani <- plot_ly(DA, x = ~Years, y = ~ `15-34 years`,frame = ~Years, name = '15-34 years',size = ~`15-34 years`, type = 'scatter', mode = 'lines-markers', line = list(color = "green2")
+        )%>%
+  add_trace(y = ~`35-44 years`, name = '35-44 years',size = ~`35-44 years`, fillcolor = 'darkgreen')%>%
+  add_trace(y = ~`45-54 years`, name = '45-54 years',size = ~`45-54 years`, fillcolor = 'darkblue')%>%
+  add_trace(y = ~`55-64 years`, name = '55-64 years',size = ~`55-64 years`, fillcolor = 'brown')%>%
+  add_trace(y = ~`65 years and over`, name = '65 years and over',size = ~`65 years and over`, fillcolor = 'darkgrey')%>%
+  layout(title = 'Drug or Alcohol induced Deaths',
+         plot_bgcolor = "aliceblue",
+         xaxis = list(title = "Years",
+                      showgrid = FALSE),
+         yaxis = list(title = "Number of Deaths",
+                      showgrid = FALSE),
+         legend = list(
+           title = list(
+             text = "<b>Age-Groups</b>",
+             font = list(color = "black")
+           )
+         ))
+ani <- layout(ani,
+            animation_opts = 
+            list(frame = list(duration = 5000,
+                              redraw = TRUE)))
+
+ani
+```
+
+
+*** 
+
+**Drug or Alcohol Induced Deaths**
+
+The consumption of Drug and Alcohol can create a significant impact on mortality rates for any country and Australia is no different. It can be noticed from the graph that:
+
+- the deaths due to consumption of **Drug and Alcohol** has been increased from year 2011-2021 for all the age groups, except **15-34 years** group.
+- the highest number of deaths due to consumption has been recorded for the age group **45-54 years** during the period.
+- It is very sad to encounter that the people above the age of **55 years** have been dying progressively due to Drug and Alcohol.
+
+
+
+
+
+### **Life Expectancy** {data-commentary-width=400}
+
+```{r include=FALSE}
+LE <- readxl::read_excel("Life Expextancy AU.xlsx")
+LE
+```
+
+```{r echo=FALSE}
+d <- dygraph(LE, main = "Life Expectancy of Australia 1950-2022") %>%
+   dyOptions(stackedGraph = TRUE) %>%
+  dyShading(from = "2011-12-31",
+               to = "2021-12-31", 
+               color = "lavender")%>%
+  dyAxis("y", label = "Life Expectancy Years") %>%
+  dyAxis("x", label = "Years(1950-2022)")%>%
+  dyRangeSelector(height = 50)
+d
+```
+
+
+
+*** 
+**Life Expectancy of Australia**
+
+As per Australian Institute of Health and Welfare (AIHW), Australia has one of the highest life expectancies in the world. Life expectancy refers to the average number of years a person is expected to live based on current mortality rates.
+
+From the overview of dygraph, it can be observed that the average rate of life expectancy in Australia has improved dramatically from the year 1950 to 2022. Life expectancy can be influenced by various factors and may vary among different population groups or specific cohorts within Australia.
+
+- The shaded (lavender) region represents the Life expectancy for the period 2011-2021. 
+
+
+
+
+
+
+
+
+
+<font style="font-size: 9px">*Note: The following graph is interactive, select any specific range of years for in depth details</plot>
+
+
+
+
+### **Conclusion** {data-commentary-width=550}
+
+```{r}
+knitr::include_graphics("C:/Users/Rakshit Chandna/Downloads/life vs death 1.jpeg")
+```
+
+***
+
+**Conclusion: Death and Life Expectancy in Australia**
+ 
+The reasons of deaths in Australia can vary and might include things like illnesses, mishaps, and other health-related problems. Historically, the leading causes of mortality in Australia have been **cardiovascular disease**, **cancer**, **respiratory disease**, and external causes such as Drug/Alcohol addiction , accidents and suicide.
+
+However, it's important to note that these causes may change over time due to advancements in healthcare, changes in lifestyle, and other factors.
+
+In comparison to many other nations, Australia has a comparatively high life expectancy. Australia's average life expectancy at birth in 2021 was roughly **81.3** years for men and **85.4** years for women. As a result, Australians can anticipate leading healthy and long lives on average.
+
+
+### **References**
+
+**Data**
+
+- Causes of Death, Australia,Statistics on the number of deaths, by sex, selected age groups, and cause of death classified to the International Classification of Diseases (ICD), Released 29/09/2022, by Australian Bureau of Statistics https://www.abs.gov.au/statistics/health/causes-death/causes-death-australia/2021
+- Intentional self-harm deaths (Suicide) in Australia, Released 29/09/2022,by Australian Bureau of Statistics   https://www.abs.gov.au/statistics/health/causes-death/causes-death-australia/2021#intentional-self-harm-deaths-suicide-in-australia
+- Drug and Alcohol Induced Deaths https://www.abs.gov.au/statistics/health/causes-death/causes-death-australia/latest-release
+- Deaths by Gender https://www.abs.gov.au/statistics/health/causes-death/causes-death-australia/latest-release
+- Deaths in Each State of Australia, 2011-2021 https://www.abs.gov.au/statistics/health/causes-death/causes-death-australia/latest-release
+- Australia Life Expectancy 1950-2023,Data Source: United Nations - World Population Prospects,  https://www.macrotrends.net/countries/AUS/australia/life-expectancy#:~:text=The%20life%20expectancy%20for%20Australia,a%200.18%25%20increase%20from%202019.
+- Life and death , by ByIain Robertsonon27th April 2020 , https://www.innovatorsmag.com/life-and-death-food-choices/
+
+**Code**
+
+- Chapter 2, Storytelling with Data, https://rmit.instructure.com/courses/107170/pages/chapter-2-learning-objectives?module_item_id=4919775
+- Chapter 8, Adding Interactivity, https://rmit.instructure.com/courses/107170/pages/chapter-8-learning-objectives?module_item_id=4919846
+- Chapter 9, Building Apps, https://dark-star-161610.appspot.com/secured/_book/demos/DataVis-Week-10-Demo.html 
+- Leaflet for R https://rstudio.github.io/leaflet/
+- Plotly line plots in R https://plotly.com/r/line-charts/
+- Scatter plots in R Language, geeksforgeeks, https://www.geeksforgeeks.org/scatter-plots-in-r-language/
+ 
+
+
+
+
+
+
+
+
